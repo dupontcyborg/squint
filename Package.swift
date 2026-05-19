@@ -15,7 +15,7 @@ let package = Package(
             name: "Squint",
             dependencies: [],
             path: "Squint",
-            exclude: ["Info.plist", "AppIcon.icns"]
+            exclude: ["Info.plist", "AppIcon.icns", "AppIcon.png"]
         )
     ]
 )
