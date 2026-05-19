@@ -1,0 +1,24 @@
+name: CI Build Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Unit Tests
+        run: |
+          swift test
+
+      - name: Verify Compilation
+        run: |
+          swift build -c release

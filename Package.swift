@@ -16,6 +16,11 @@ let package = Package(
             dependencies: [],
             path: "Squint",
             exclude: ["Info.plist", "AppIcon.icns", "AppIcon.png"]
+        ),
+        .testTarget(
+            name: "SquintTests",
+            dependencies: ["Squint"],
+            path: "SquintTests"
         )
     ]
 )

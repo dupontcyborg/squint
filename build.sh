@@ -3,6 +3,9 @@
 # Exit on error
 set -e
 
+echo "Running unit tests..."
+swift test
+
 echo "Building Squint..."
 swift build -c release
 

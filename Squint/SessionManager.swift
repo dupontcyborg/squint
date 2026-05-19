@@ -30,15 +30,36 @@ public class SessionManager: ObservableObject {
     private var originalAutoBrightnessState: Bool = true
     private let sentinelURL: URL
     
-    private init() {
-        // Resolve sentinel file path in Application Support/Squint/sentinel.json
+    // Test hooks for dependency injection
+    internal var getAmbientLightCompensation: () -> Bool = {
+        DisplayServices.isAmbientLightCompensationEnabled()
+    }
+    internal var setAmbientLightCompensation: (Bool) -> Bool = { enabled in
+        DisplayServices.setAmbientLightCompensation(enabled: enabled)
+    }
+    
+    // Internal initializer for dependency injection in unit tests
+    internal init(
+        sentinelURL: URL? = nil,
+        getBrightness: (() -> Bool)? = nil,
+        setBrightness: ((Bool) -> Bool)? = nil
+    ) {
         let fileManager = FileManager.default
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let squintDir = appSupport.appendingPathComponent("Squint", isDirectory: true)
-        self.sentinelURL = squintDir.appendingPathComponent("sentinel.json")
+        if let customURL = sentinelURL {
+            self.sentinelURL = customURL
+        } else {
+            let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let squintDir = appSupport.appendingPathComponent("Squint", isDirectory: true)
+            self.sentinelURL = squintDir.appendingPathComponent("sentinel.json")
+            try? fileManager.createDirectory(at: squintDir, withIntermediateDirectories: true)
+        }
         
-        // Ensure parent directory exists
-        try? fileManager.createDirectory(at: squintDir, withIntermediateDirectories: true)
+        if let getBrightness = getBrightness {
+            self.getAmbientLightCompensation = getBrightness
+        }
+        if let setBrightness = setBrightness {
+            self.setAmbientLightCompensation = setBrightness
+        }
         
         // Fetch current system state
         updateAutoBrightnessStatus()
@@ -52,20 +73,20 @@ public class SessionManager: ObservableObject {
     
     /// Queries the display service for the current auto-brightness state and updates the local state.
     public func updateAutoBrightnessStatus() {
-        self.isAutoBrightnessEnabledInSystem = DisplayServices.isAmbientLightCompensationEnabled()
+        self.isAutoBrightnessEnabledInSystem = getAmbientLightCompensation()
     }
     
     /// Starts a new auto-brightness suppression session.
     /// - Parameter duration: Optional time interval. If `nil`, the session runs indefinitely.
     public func startSession(duration: TimeInterval?) {
         // Query the state before disabling. If we are already active, keep the original originalState.
-        let currentSystemState = DisplayServices.isAmbientLightCompensationEnabled()
+        let currentSystemState = getAmbientLightCompensation()
         if case .inactive = self.state {
             self.originalAutoBrightnessState = currentSystemState
         }
         
         // Turn off auto-brightness
-        DisplayServices.setAmbientLightCompensation(enabled: false)
+        _ = setAmbientLightCompensation(false)
         
         if let duration = duration {
             let endTime = Date().addingTimeInterval(duration)
@@ -83,7 +104,7 @@ public class SessionManager: ObservableObject {
     /// Cancels the active session and restores the original auto-brightness state.
     public func cancelSession() {
         stopTimer()
-        DisplayServices.setAmbientLightCompensation(enabled: originalAutoBrightnessState)
+        _ = setAmbientLightCompensation(originalAutoBrightnessState)
         deleteSentinel()
         self.state = .inactive
         updateAutoBrightnessStatus()
@@ -95,7 +116,7 @@ public class SessionManager: ObservableObject {
             return
         }
         // Revert settings
-        DisplayServices.setAmbientLightCompensation(enabled: originalAutoBrightnessState)
+        _ = setAmbientLightCompensation(originalAutoBrightnessState)
         deleteSentinel()
     }
     
@@ -172,25 +193,25 @@ public class SessionManager: ObservableObject {
         
         switch sentinel.type {
         case .indefinite:
-            DisplayServices.setAmbientLightCompensation(enabled: false)
+            _ = setAmbientLightCompensation(false)
             self.state = .indefinite
             
         case .timed(let endTime):
             let now = Date()
             if now >= endTime {
                 // Expired while app was dead
-                DisplayServices.setAmbientLightCompensation(enabled: sentinel.originalState)
+                _ = setAmbientLightCompensation(sentinel.originalState)
                 deleteSentinel()
                 self.state = .inactive
             } else {
                 // Resume session with remaining time
-                DisplayServices.setAmbientLightCompensation(enabled: false)
+                _ = setAmbientLightCompensation(false)
                 startTimer(endTime: endTime)
             }
             
         case .paused(let remaining):
             // If the app crashed or was closed while the system was asleep
-            DisplayServices.setAmbientLightCompensation(enabled: false)
+            _ = setAmbientLightCompensation(false)
             let endTime = Date().addingTimeInterval(remaining)
             startTimer(endTime: endTime)
             saveSentinel(type: .timed(endTime: endTime))
