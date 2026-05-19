@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <key>Squint</key>
+    <key>CFBundleIdentifier</key>
+    <key>com.nicolas.Squint</key>
+    <key>CFBundleName</key>
+    <key>Squint</key>
+    <key>CFBundlePackageType</key>
+    <key>APPL</key>
+    <key>CFBundleShortVersionString</key>
+    <key>0.1.0</key>
+    <key>LSMinimumSystemVersion</key>
+    <key>13.0</key>
+    <key>LSUIElement</key>
+    <key>true</key>
+    <key>CFBundleIconFile</key>
+    <key>AppIcon</key>
+</dict>
+</plist>

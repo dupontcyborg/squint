@@ -1,0 +1,5 @@
+.DS_Store
+.build/
+build/
+Squint-*.dmg
+transparent_icon.png
