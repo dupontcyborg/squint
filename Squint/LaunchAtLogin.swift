@@ -4,11 +4,9 @@ import ServiceManagement
 public struct LaunchAtLogin {
     /// Check if launch at login is currently registered/enabled for this app.
     public static var isEnabled: Bool {
-        get {
-            return SMAppService.mainApp.status == .enabled
-        }
+        SMAppService.mainApp.status == .enabled
     }
-    
+
     /// Toggle launch at login status.
     /// - Parameter enable: `true` to register, `false` to unregister.
     /// - Returns: `true` if the toggle succeeded, `false` if an error occurred.
