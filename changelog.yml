@@ -4,8 +4,6 @@ v0.1.0:
     - Core menu bar Extra app wrapper.
     - Suppress auto-brightness for timed durations or indefinitely.
     - Graceful recovery from system crashes via local sentinel.
-  signature: 
-    sparkle:edSignature="mufyuQayzxNf+VrvWdYshVB6gQogTLW7LF4hBfaIA9tP9Pe1rNxMIQHYDzb/VhRdAFmj23fDbD+Gbe7obkpqDA=="
-    length="2528711"
+  signature: mufyuQayzxNf+VrvWdYshVB6gQogTLW7LF4hBfaIA9tP9Pe1rNxMIQHYDzb/VhRdAFmj23fDbD+Gbe7obkpqDA==
   size: 2528711
   date: '2026-05-20T21:49:57Z'
