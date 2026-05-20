@@ -223,22 +223,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release edit ${{ github.ref_name }} --prerelease=false --latest
 
-      - name: Update Appcast Feed
+      - name: Install Python Dependencies
+        run: pip3 install 'ruamel.yaml==0.18.6'
+
+      - name: Append release metadata to changelog
         env:
           VERSION: ${{ github.ref_name }}
           SIGNATURE: ${{ needs.build.outputs.signature }}
           SIZE: ${{ needs.build.outputs.size }}
         run: |
-          CLEAN_VERSION="${VERSION#v}"
-          DMG_URL="https://squint.sh/download/$VERSION/Squint.dmg"
-          NOTES_URL="https://github.com/dupontcyborg/squint/releases/tag/$VERSION"
-
-          python3 scripts/update_appcast.py \
-            "$CLEAN_VERSION" \
-            "$SIGNATURE" \
-            "$SIZE" \
-            "$DMG_URL" \
-            "$NOTES_URL"
+          python3 scripts/append_release_metadata.py "$VERSION" "$SIGNATURE" "$SIZE"
 
       - name: Bump website package.json version
         env:
@@ -249,25 +243,25 @@ jobs:
           # prevents npm from making its own commit/tag (we handle git below).
           npm --prefix website version "$CLEAN_VERSION" --no-git-tag-version --allow-same-version
 
-      - name: Open Appcast PR
+      - name: Open release PR
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="release/appcast-${{ github.ref_name }}"
+          BRANCH="release/${{ github.ref_name }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git checkout -b "$BRANCH"
-          git add website/public/appcast.xml website/package.json website/package-lock.json
+          git add changelog.yml website/package.json website/package-lock.json
           if git diff --cached --quiet; then
             echo "Appcast unchanged; nothing to PR"
             exit 0
           fi
-          git commit -m "chore: update appcast.xml for ${{ github.ref_name }}"
+          git commit -m "chore: publish ${{ github.ref_name }}"
           git push -u origin "$BRANCH"
 
           gh pr create \
             --base main \
             --head "$BRANCH" \
-            --title "chore: update appcast.xml for ${{ github.ref_name }}" \
-            --body "Automated appcast update for release ${{ github.ref_name }}."
+            --title "chore: publish ${{ github.ref_name }}" \
+            --body "Automated release metadata for ${{ github.ref_name }}. Merging triggers a website rebuild that regenerates the appcast feed."

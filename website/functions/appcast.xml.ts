@@ -28,19 +28,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const match = ua.match(UA_RE);
     if (match) {
         const [, appVersion, osVersion, arch, sparkleVersion] = match;
+        // Analytics Engine allows exactly one index per event. We use
+        // appVersion so version-distribution queries are cheap. Unmatched
+        // requests use a sentinel index that can't collide with a real
+        // version string.
         env.APPCAST_ANALYTICS.writeDataPoint({
-            // blobs are strings; indexes are queryable. The first index lets us
-            // filter matched vs. unmatched; the second indexes by app version.
             blobs: [appVersion, osVersion?.trim() ?? "", arch?.trim() ?? "", sparkleVersion],
-            indexes: ["matched", appVersion],
+            indexes: [appVersion],
         });
     } else {
-        // Log unmatched requests so we can alarm on a sudden spike (regex broke,
-        // Sparkle changed UA format, etc.). Truncate the UA to 120 chars to
-        // avoid logging giant strings from rogue bots.
+        // Log unmatched requests so we can alarm on a sudden spike (regex
+        // broke, Sparkle changed UA format, etc.). Truncate the UA to 120
+        // chars to avoid logging giant strings from rogue bots.
         env.APPCAST_ANALYTICS.writeDataPoint({
             blobs: [ua.slice(0, 120)],
-            indexes: ["unmatched"],
+            indexes: ["__unmatched__"],
         });
     }
 

@@ -57,9 +57,11 @@ Restrict both environments to `v*` tag refs (Settings → Environments → [env]
 
 5. **Approve the release promotion.** The `approve-and-publish` job is gated on the `release` environment. An approver in GitHub Actions UI clicks **Review deployments → Approve**. This:
    - Flips the release from pre-release to latest stable.
-   - Runs `scripts/update_appcast.py` to append the new `<item>` to `website/public/appcast.xml`.
+   - Runs `scripts/append_release_metadata.py` to add `signature`, `size`, and `date` fields to the tag's entry in `changelog.yml`.
    - Bumps `website/package.json` (and `package-lock.json`) so the landing page's download button reflects the new version.
-   - Opens a PR `release/appcast-vX.Y.Z` against `main`. Merge it to ship the update to Sparkle clients and the website (Cloudflare Pages rebuilds the site on merge).
+   - Opens a PR `release/vX.Y.Z` against `main`. Merge it to ship the update.
+
+   On merge, Cloudflare Pages rebuilds the site. The Astro endpoint at `website/src/pages/appcast.xml.ts` reads `changelog.yml` and regenerates `dist/appcast.xml` with the new entry — no XML is ever hand-edited or committed.
 
 ## Local Build (Debugging Only)
 
