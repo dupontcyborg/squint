@@ -1,1 +1,2 @@
-/download  https://github.com/dupontcyborg/squint/releases/latest  302
+/download           https://github.com/dupontcyborg/squint/releases/latest/download/Squint.dmg          302
+/download/:version  https://github.com/dupontcyborg/squint/releases/download/:version/Squint.dmg       302

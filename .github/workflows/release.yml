@@ -229,7 +229,7 @@ jobs:
           SIZE: ${{ needs.build.outputs.size }}
         run: |
           CLEAN_VERSION="${VERSION#v}"
-          DMG_URL="https://squint.sh/dl/$VERSION/Squint.dmg"
+          DMG_URL="https://squint.sh/download/$VERSION/Squint.dmg"
           NOTES_URL="https://github.com/dupontcyborg/squint/releases/tag/$VERSION"
 
           python3 scripts/update_appcast.py \
