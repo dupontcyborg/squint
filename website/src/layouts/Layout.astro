@@ -1,0 +1,57 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '@/styles/globals.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogSlug?: 'home' | 'privacy';
+}
+
+const {
+  title = 'Squint - Suppress macOS Auto-Brightness',
+  description = 'A lightweight macOS utility to temporarily suppress auto-brightness during color-sensitive work, presentations, or video viewing.',
+  ogSlug = 'home',
+} = Astro.props;
+
+const ogImageUrl = new URL(`/og/${ogSlug}.png`, Astro.site ?? 'https://squint.sh').toString();
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://squint.sh').toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <ClientRouter />
+
+    <script is:inline>
+      window.plausible = window.plausible || function () {
+        (window.plausible.q = window.plausible.q || []).push(arguments);
+      };
+    </script>
+    <script defer data-domain="squint.sh" src="https://d1w0psmo3bkh8z.cloudfront.net/js/script.js" is:inline></script>
+  </head>
+  <body class="font-sans text-white antialiased">
+    <div transition:animate="fade">
+      <slot />
+    </div>
+  </body>
+</html>

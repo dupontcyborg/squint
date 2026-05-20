@@ -1,0 +1,33 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+  pageTitle?: string;
+  ogSlug?: 'home' | 'privacy';
+}
+
+const { title, pageTitle, ogSlug } = Astro.props;
+---
+
+<Layout title={pageTitle ?? `${title} - Squint`} ogSlug={ogSlug}>
+  <main class="min-h-screen py-12 px-6">
+    <div class="max-w-2xl mx-auto">
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-8"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back
+      </a>
+
+      <h1 class="text-3xl font-bold mb-8">{title}</h1>
+
+      <div class="prose prose-invert prose-p:text-white/80 prose-headings:text-white prose-li:text-white/80 max-w-none">
+        <slot />
+      </div>
+    </div>
+  </main>
+</Layout>

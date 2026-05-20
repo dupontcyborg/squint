@@ -1,0 +1,83 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+---
+
+<PageLayout title="Privacy Policy" pageTitle="Privacy Policy - Squint" ogSlug="privacy">
+  <p class="text-white/60 mb-8">Last updated: May 19, 2026</p>
+
+  <p class="mb-4">
+    <strong>App name:</strong> Squint<br />
+    <strong>Developer:</strong> Nicolas Dupont<br />
+    <strong>Contact:</strong> Open an issue on the <a href="https://github.com/dupontcyborg/squint/issues" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Squint GitHub repository</a>
+  </p>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">The short version</h2>
+  <p class="mb-4">
+    Squint runs <strong>entirely on your Mac</strong>. It has no user accounts, requires no permissions beyond display control, and does not transmit information about your usage of the app.
+  </p>
+  <p>
+    Squint is open source. The full source code — including the Cloudflare Function that processes update-check requests — is available on <a href="https://github.com/dupontcyborg/squint" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">GitHub</a>. You can verify exactly what happens with your data.
+  </p>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">What we collect & process</h2>
+
+  <h3 class="text-lg font-semibold mt-6 mb-3">A. Update checks</h3>
+  <p class="mb-4">
+    About once per day while the app is running, Squint checks for updates by fetching <code>https://squint.sh/appcast.xml</code> via the <a href="https://sparkle-project.org/" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Sparkle</a> framework. This request contains:
+  </p>
+  <ul class="list-disc pl-6 mb-4 space-y-2">
+    <li>A <strong>User-Agent</strong> header with the app version, macOS version, CPU architecture, and Sparkle version (e.g., <code>Squint/1.0.0 (macOS 14.4; arm64) Sparkle/2.5.0</code>)</li>
+    <li>Your <strong>IP address</strong>, as with any HTTP request</li>
+    <li>Other standard HTTP headers (<code>Accept-Language</code>, etc.)</li>
+  </ul>
+  <p class="mb-4">
+    A Cloudflare Pages Function serves the appcast and logs the parsed User-Agent contents — app version, macOS version, and architecture — to Cloudflare Analytics Engine. These logs help us understand which versions of Squint are in active use and how quickly releases are adopted.
+  </p>
+  <p class="mb-4">
+    We do <strong>not</strong> log IP addresses, store persistent identifiers, or attempt to deduplicate requests to individual users. The metric we track is total appcast requests per day, broken down by version and OS. Logs are retained for up to 92 days, after which Cloudflare Analytics Engine automatically removes them.
+  </p>
+  <p>
+    Cloudflare itself processes IP addresses at the network edge for security and performance purposes. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Cloudflare's privacy policy</a> for details.
+  </p>
+
+  <h3 class="text-lg font-semibold mt-6 mb-3">B. Website analytics</h3>
+  <p>
+    The website <code>squint.sh</code> uses <a href="https://plausible.io/" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Plausible Analytics</a> to count page views and download conversions. Plausible is cookie-free and does not collect personally identifying information. See <a href="https://plausible.io/data-policy" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Plausible's data policy</a> for details.
+  </p>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">What we don't do</h2>
+  <ul class="list-disc pl-6 space-y-2">
+    <li>No analytics SDKs are embedded in the app</li>
+    <li>No cookies or tracking pixels</li>
+    <li>No persistent device or install identifiers</li>
+    <li>No data is sold or shared with third parties</li>
+    <li>No advertising</li>
+  </ul>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">Service providers</h2>
+  <ul class="list-disc pl-6 space-y-2">
+    <li><strong>Cloudflare</strong> hosts the website and runs the edge function that serves the appcast. <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Cloudflare privacy policy</a>.</li>
+    <li><strong>Plausible Analytics</strong> processes website analytics on our behalf. <a href="https://plausible.io/data-policy" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Plausible data policy</a>.</li>
+    <li><strong>GitHub</strong> hosts the source code and distributes the app binary via GitHub Releases. <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">GitHub privacy statement</a>.</li>
+  </ul>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">Your choices</h2>
+  <p>
+    Update checks can be disabled in the app's settings. With update checks disabled, the app makes no network requests at all and the data described in Section A is no longer transmitted.
+  </p>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">Legal basis (GDPR)</h2>
+  <p>
+    For users in the European Union, the lawful basis for processing the limited data described above is our legitimate interest in maintaining and improving Squint. You can object to this processing by disabling update checks in the app's settings.
+  </p>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">Changes</h2>
+  <p>
+    If we make material changes to this policy, we'll note the change in the app's release notes and update the date at the top of this page.
+  </p>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">Contact</h2>
+  <p>
+    Questions? Open an issue on the <a href="https://github.com/dupontcyborg/squint/issues" target="_blank" rel="noopener noreferrer" class="text-white underline hover:no-underline">Squint GitHub repository</a>.
+  </p>
+</PageLayout>
