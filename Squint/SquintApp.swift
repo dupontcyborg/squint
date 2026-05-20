@@ -1,5 +1,6 @@
 import SwiftUI
 import Cocoa
+import Sparkle
 
 @main
 struct SquintApp: App {
@@ -8,7 +9,7 @@ struct SquintApp: App {
 
     var body: some Scene {
         MenuBarExtra(content: {
-            MenuView()
+            MenuView(updater: appDelegate.updaterController.updater)
         }, label: {
             Image(systemName: session.state == .inactive ? "sun.max" : "sun.max.fill")
         })
@@ -16,6 +17,14 @@ struct SquintApp: App {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    // Sparkle's standard controller. `startingUpdater: true` lets it run scheduled
+    // background checks per SUEnableAutomaticChecks in Info.plist.
+    let updaterController = SPUStandardUpdaterController(
+        startingUpdater: true,
+        updaterDelegate: nil,
+        userDriverDelegate: nil
+    )
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Run as accessory (menu-bar only, no Dock icon or normal app windows)
         NSApp.setActivationPolicy(.accessory)
@@ -28,8 +37,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 struct MenuView: View {
+    let updater: SPUUpdater
     @ObservedObject var session = SessionManager.shared
     @State private var launchAtLoginEnabled = LaunchAtLogin.isEnabled
+    @State private var canCheckForUpdates = true
 
     var body: some View {
         Group {
@@ -106,6 +117,11 @@ struct MenuView: View {
                 }
             })
 
+            Button("Check for Updates…") {
+                updater.checkForUpdates()
+            }
+            .disabled(!canCheckForUpdates)
+
             Divider()
 
             Button("Quit Squint") {
@@ -116,6 +132,7 @@ struct MenuView: View {
             session.updateAutoBrightnessStatus()
             launchAtLoginEnabled = LaunchAtLogin.isEnabled
         }
+        .onReceive(updater.publisher(for: \.canCheckForUpdates)) { canCheckForUpdates = $0 }
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {

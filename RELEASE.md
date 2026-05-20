@@ -19,8 +19,14 @@ Set the following under **Settings → Secrets and variables → Actions**:
 
 The matching `SPARKLE_PUBLIC_KEY` must be set as `SUPublicEDKey` in `Squint/Info.plist`.
 
-### Production environment
-Create a GitHub environment named `production` with required reviewers — this gates the promotion step.
+### GitHub Environments
+
+Two environments scope the secrets:
+
+- **`pre-release`** — holds the signing secrets above. Assigned to the `build` job, which is the only place they're consumed. No reviewers; runs automatically on tag push.
+- **`release`** — holds nothing extra (only uses the built-in `GITHUB_TOKEN`). Assigned to `approve-and-publish`. Add required reviewers here; this is the manual gate that promotes a pre-release to stable.
+
+Restrict both environments to `v*` tag refs (Settings → Environments → [env] → Deployment branches and tags → Selected → add Tag rule `v*`) so the secrets can never be exposed by a non-tag workflow run.
 
 ## Cutting a Release
 
@@ -49,7 +55,7 @@ Create a GitHub environment named `production` with required reviewers — this 
 
 4. **Pre-release is published automatically** on the GitHub Releases page. Smoke-test the DMG locally.
 
-5. **Approve the production promotion.** The `approve-and-publish` job is gated on the `production` environment. An approver in GitHub Actions UI clicks **Review deployments → Approve**. This:
+5. **Approve the release promotion.** The `approve-and-publish` job is gated on the `release` environment. An approver in GitHub Actions UI clicks **Review deployments → Approve**. This:
    - Flips the release from pre-release to latest stable.
    - Runs `scripts/update_appcast.py` to append the new `<item>` to `website/public/appcast.xml`.
    - Bumps `website/package.json` (and `package-lock.json`) so the landing page's download button reflects the new version.
@@ -60,16 +66,31 @@ Create a GitHub environment named `production` with required reviewers — this 
 For reproducing failures or testing the bundle without cutting a release:
 
 ```bash
-./build.sh                                                    # → build/Squint.app
-codesign --force --options runtime --timestamp \
-  --sign "Developer ID Application: Your Name (TEAMID)" build/Squint.app
+IDENTITY="Developer ID Application: Your Name (TEAMID)"
+
+./build.sh                                                    # → build/Squint.app (embeds Sparkle)
+
+# Sign Sparkle's nested helpers (in order) then the framework, then the app.
+SPARKLE_FW="build/Squint.app/Contents/Frameworks/Sparkle.framework"
+for h in "$SPARKLE_FW/Versions/B/XPCServices/Installer.xpc" \
+         "$SPARKLE_FW/Versions/B/XPCServices/Downloader.xpc" \
+         "$SPARKLE_FW/Versions/B/Autoupdate" \
+         "$SPARKLE_FW/Versions/B/Updater.app"; do
+    [ -e "$h" ] && codesign --force --timestamp --options runtime --sign "$IDENTITY" "$h"
+done
+codesign --force --timestamp --options runtime --sign "$IDENTITY" "$SPARKLE_FW"
+codesign --force --timestamp --options runtime --sign "$IDENTITY" build/Squint.app
 codesign --verify --deep --strict --verbose=2 build/Squint.app
-./create_dmg.sh                                               # → Squint-X.Y.Z.dmg
-codesign --force --timestamp \
-  --sign "Developer ID Application: Your Name (TEAMID)" Squint-X.Y.Z.dmg
-xcrun notarytool submit Squint-X.Y.Z.dmg --keychain-profile "AC_PASSWORD" --wait
-xcrun stapler staple Squint-X.Y.Z.dmg
-spctl --assess --type open --context context:primary-signature --verbose Squint-X.Y.Z.dmg
+
+# Package + sign DMG
+mkdir -p build/dmg-root && cp -R build/Squint.app build/dmg-root/
+hdiutil create -fs HFS+ -srcfolder build/dmg-root/ -volname "Squint" build/Squint.dmg
+rm -rf build/dmg-root
+codesign --force --timestamp --sign "$IDENTITY" build/Squint.dmg
+
+xcrun notarytool submit build/Squint.dmg --keychain-profile "AC_PASSWORD" --wait
+xcrun stapler staple build/Squint.dmg
+spctl --assess --type open --context context:primary-signature --verbose build/Squint.dmg
 ```
 
 The `AC_PASSWORD` keychain profile is created once with:
@@ -78,4 +99,4 @@ xcrun notarytool store-credentials "AC_PASSWORD" \
   --apple-id "you@example.com" --team-id "TEAMID" --password "xxxx-xxxx-xxxx-xxxx"
 ```
 
-Do **not** use a local build for production distribution — the CI flow is the source of truth for signing, signature consistency, and appcast publication.
+Do **not** use a local build for release distribution — the CI flow is the source of truth for signing, signature consistency, and appcast publication.

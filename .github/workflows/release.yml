@@ -33,6 +33,7 @@ jobs:
     name: Build, Sign, and Notarize
     needs: test
     runs-on: macos-14
+    environment: pre-release
     outputs:
       signature: ${{ steps.sparkle-sign.outputs.signature }}
       size: ${{ steps.sparkle-sign.outputs.size }}
@@ -200,7 +201,7 @@ jobs:
     name: Approve and Publish Production Release
     needs: [build, publish-prerelease]
     runs-on: ubuntu-latest
-    environment: production
+    environment: release
     permissions:
       contents: write
       pull-requests: write

@@ -3,20 +3,28 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <key>Squint</key>
+    <string>Squint</string>
     <key>CFBundleIdentifier</key>
-    <key>com.nicolas.Squint</key>
+    <string>com.nicolas.Squint</string>
     <key>CFBundleName</key>
-    <key>Squint</key>
+    <string>Squint</string>
     <key>CFBundlePackageType</key>
-    <key>APPL</key>
+    <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <key>0.1.0</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>0.1.0</string>
     <key>LSMinimumSystemVersion</key>
-    <key>13.0</key>
+    <string>13.0</string>
     <key>LSUIElement</key>
-    <key>true</key>
+    <true/>
     <key>CFBundleIconFile</key>
-    <key>AppIcon</key>
+    <string>AppIcon</string>
+    <key>SUFeedURL</key>
+    <string>https://squint.sh/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>X9E5gUp3Yg9FR/VLA1NzGa1OTx/fJE54uF3YZ6DRC8E=</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
 </dict>
 </plist>

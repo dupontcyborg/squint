@@ -45,11 +45,7 @@ open build/Squint.app
 
 ## Packaging a Release
 
-To create a drag-and-drop DMG for distribution:
-```bash
-./create_dmg.sh
-```
-This generates a `Squint-[VERSION].dmg` file in the repository root.
+Releases are cut by pushing a `v*` tag — see [RELEASE.md](RELEASE.md) for the automated flow (sign, notarize, appcast, GitHub release).
 
 ## License
 MIT License. See [LICENSE](LICENSE) (or the repository info) for details.
