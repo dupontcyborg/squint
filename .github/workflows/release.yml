@@ -121,9 +121,12 @@ jobs:
           xcrun stapler staple build/Squint.app
           spctl --assess --type execute --verbose=2 build/Squint.app
 
-      - name: Create and Sign DMG
+      - name: Create, Sign, and Notarize DMG
         env:
           DEVELOPER_ID_NAME: ${{ secrets.DEVELOPER_ID_NAME }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           rm -f build/Squint.zip
           mkdir -p build/dmg-root
@@ -132,9 +135,20 @@ jobs:
           hdiutil create -fs HFS+ -srcfolder build/dmg-root/ -volname "Squint" build/Squint.dmg
           rm -rf build/dmg-root
 
-          # Gatekeeper requires the DMG itself to be signed to avoid the
-          # "downloaded from internet" warning on first open.
+          # Sign the DMG so Gatekeeper doesn't show the "downloaded from
+          # internet" warning when mounting.
           codesign --force --timestamp --sign "Developer ID Application: $DEVELOPER_ID_NAME" build/Squint.dmg
+
+          # Notarize the DMG itself. The contained .app was already notarized
+          # + stapled in the previous step; this adds the same protection to
+          # the DMG so users can mount it offline without Gatekeeper checks.
+          xcrun notarytool submit build/Squint.dmg \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+          xcrun stapler staple build/Squint.dmg
           spctl --assess --type open --context context:primary-signature --verbose=2 build/Squint.dmg
 
       - name: Sign Sparkle Update (EdDSA)
