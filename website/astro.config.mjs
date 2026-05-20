@@ -1,13 +1,11 @@
-import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
+import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  output: 'static',
-  trailingSlash: 'always',
-  site: 'https://squint.sh',
-  prefetch: {
-    prefetchAll: true,
-    defaultStrategy: 'hover',
-  },
-  integrations: [react()],
+    output: "static",
+    trailingSlash: "always",
+    site: "https://squint.sh",
+    prefetch: {
+        prefetchAll: true,
+        defaultStrategy: "hover",
+    },
 });

@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-squint-dark: #0b090c;
-  --color-squint-deep: #141117;
-  --color-squint-orange: #f59e0b;
-  --color-squint-amber: #d97706;
+    --color-squint-dark: #0b090c;
+    --color-squint-deep: #141117;
+    --color-squint-orange: #f59e0b;
+    --color-squint-amber: #d97706;
 }
 
 html {
-  background: var(--color-squint-dark) linear-gradient(180deg, var(--color-squint-dark) 0%, var(--color-squint-deep) 100%) fixed;
-  min-height: 100vh;
+    background: var(--color-squint-dark)
+        linear-gradient(180deg, var(--color-squint-dark) 0%, var(--color-squint-deep) 100%) fixed;
+    min-height: 100vh;
 }

@@ -1,21 +1,21 @@
 ---
-import { ClientRouter } from 'astro:transitions';
-import '@/styles/globals.css';
+import { ClientRouter } from "astro:transitions";
+import "@/styles/globals.css";
 
 interface Props {
-  title?: string;
-  description?: string;
-  ogSlug?: 'home' | 'privacy';
+    title?: string;
+    description?: string;
+    ogSlug?: "home" | "privacy";
 }
 
 const {
-  title = 'Squint - Temporarily Disable macOS Auto-Brightness',
-  description = 'A lightweight macOS utility to temporarily suppress auto-brightness during color-sensitive work, presentations, or video viewing.',
-  ogSlug = 'home',
+    title = "Squint - Temporarily Disable macOS Auto-Brightness",
+    description = "A lightweight macOS utility to temporarily suppress auto-brightness during color-sensitive work, presentations, or video viewing.",
+    ogSlug = "home",
 } = Astro.props;
 
-const ogImageUrl = new URL(`/og/${ogSlug}.png`, Astro.site ?? 'https://squint.sh').toString();
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? 'https://squint.sh').toString();
+const ogImageUrl = new URL(`/og/${ogSlug}.png`, Astro.site ?? "https://squint.sh").toString();
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? "https://squint.sh").toString();
 ---
 
 <!doctype html>

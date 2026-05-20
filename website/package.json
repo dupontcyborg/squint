@@ -1,30 +1,32 @@
 {
-  "name": "squint-website",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "check": "astro check"
-  },
-  "dependencies": {
-    "@astrojs/react": "^5.0.5",
-    "@resvg/resvg-js": "^2.6.2",
-    "@tailwindcss/postcss": "^4.0.0",
-    "astro": "^6.3.6",
-    "postcss": "^8.4.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "satori": "^0.26.0",
-    "tailwindcss": "^4.0.0"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.9",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "typescript": "^6.0.3"
-  }
+    "name": "squint-website",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro",
+        "check": "astro check",
+        "lint": "biome lint .",
+        "lint:fix": "biome lint --write .",
+        "format": "biome format --write .",
+        "format:check": "biome format .",
+        "ci": "biome ci ."
+    },
+    "dependencies": {
+        "@resvg/resvg-js": "^2.6.2",
+        "@tailwindcss/postcss": "^4.0.0",
+        "astro": "^6.3.6",
+        "postcss": "^8.4.0",
+        "satori": "^0.26.0",
+        "tailwindcss": "^4.0.0"
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.9",
+        "@biomejs/biome": "2.4.15",
+        "@types/node": "^25.9.1",
+        "typescript": "^6.0.3"
+    }
 }

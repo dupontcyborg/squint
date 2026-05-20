@@ -11,13 +11,13 @@ let package = Package(
     ],
     dependencies: [
         // Keep version in sync with SPARKLE_VERSION in .github/workflows/release.yml.
-        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.2"),
+        .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.9.2")
     ],
     targets: [
         .executableTarget(
             name: "Squint",
             dependencies: [
-                .product(name: "Sparkle", package: "Sparkle"),
+                .product(name: "Sparkle", package: "Sparkle")
             ],
             path: "Squint",
             exclude: ["Info.plist", "AppIcon.icns", "AppIcon.png"],
