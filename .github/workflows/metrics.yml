@@ -1,0 +1,60 @@
+name: Daily Metrics Accumulation
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Daily at 04:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: metrics
+  cancel-in-progress: false
+
+jobs:
+  accumulate:
+    name: Accumulate Metrics
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Seed prior metrics from stats branch
+        run: |
+          mkdir -p /tmp/metrics
+          git fetch origin stats:stats 2>/dev/null || echo "stats branch does not exist yet"
+          if git show-ref --verify --quiet refs/heads/stats; then
+            git show stats:stats/metrics.csv > /tmp/metrics/metrics.csv 2>/dev/null || true
+          fi
+
+      - name: Run metrics accumulator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          METRICS_CSV_PATH: /tmp/metrics/metrics.csv
+        run: python3 scripts/update_metrics.py
+
+      - name: Commit to stats branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git show-ref --verify --quiet refs/heads/stats; then
+            git checkout stats
+          else
+            git checkout --orphan stats
+            git rm -rf . >/dev/null 2>&1 || true
+          fi
+
+          mkdir -p stats
+          cp /tmp/metrics/metrics.csv stats/metrics.csv
+
+          git add stats/metrics.csv
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: accumulate daily metrics for $(date -u +%Y-%m-%d)"
+          git push origin stats

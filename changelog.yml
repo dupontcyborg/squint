@@ -1,0 +1,6 @@
+v0.1.0:
+  title: "Initial Release"
+  notes: |
+    - Core menu bar Extra app wrapper.
+    - Suppress auto-brightness for timed durations or indefinitely.
+    - Graceful recovery from system crashes via local sentinel.

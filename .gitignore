@@ -4,3 +4,6 @@ build/
 Squint-*.dmg
 transparent_icon.png
 PRD.md
+implementation_plan.md
+.vscode/
+__pycache__/

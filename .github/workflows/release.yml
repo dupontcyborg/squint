@@ -1,0 +1,272 @@
+name: Release Build & Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  SPARKLE_VERSION: "2.9.2"
+
+jobs:
+  test:
+    name: Lint & Test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --strict
+
+      - name: Run Unit Tests
+        run: swift test
+
+  build:
+    name: Build, Sign, and Notarize
+    needs: test
+    runs-on: macos-14
+    outputs:
+      signature: ${{ steps.sparkle-sign.outputs.signature }}
+      size: ${{ steps.sparkle-sign.outputs.size }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Python Dependencies
+        run: pip3 install 'PyYAML==6.0.2'
+
+      - name: Validate Changelog
+        run: python3 scripts/validate_changelog.py ${{ github.ref_name }}
+
+      - name: Install macOS Certificate
+        env:
+          MACOS_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          umask 077
+          echo "$MACOS_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 12)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+
+          security import certificate.p12 -k "$KEYCHAIN_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/productsign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          rm certificate.p12
+
+      - name: Build Application
+        # Tests run in the `test` job; skip them here to avoid duplicate work
+        # on the expensive macos-14 runner.
+        run: ./build.sh --no-tests
+
+      - name: Code Sign Sparkle and App
+        env:
+          DEVELOPER_ID_NAME: ${{ secrets.DEVELOPER_ID_NAME }}
+        run: |
+          IDENTITY="Developer ID Application: $DEVELOPER_ID_NAME"
+          SPARKLE_FW="build/Squint.app/Contents/Frameworks/Sparkle.framework"
+
+          # Sparkle requires nested helpers signed individually, in order,
+          # before the framework bundle itself. See:
+          # https://sparkle-project.org/documentation/sandboxing/#code-signing
+          if [ -d "$SPARKLE_FW" ]; then
+            for helper in \
+              "$SPARKLE_FW/Versions/B/XPCServices/Installer.xpc" \
+              "$SPARKLE_FW/Versions/B/XPCServices/Downloader.xpc" \
+              "$SPARKLE_FW/Versions/B/Autoupdate" \
+              "$SPARKLE_FW/Versions/B/Updater.app"; do
+              if [ -e "$helper" ]; then
+                echo "Signing $helper"
+                codesign --force --timestamp --options runtime --sign "$IDENTITY" "$helper"
+              fi
+            done
+            echo "Signing Sparkle.framework"
+            codesign --force --timestamp --options runtime --sign "$IDENTITY" "$SPARKLE_FW"
+          fi
+
+          echo "Signing Squint.app"
+          codesign --force --timestamp --options runtime --sign "$IDENTITY" "build/Squint.app"
+
+          echo "Verifying app signature"
+          codesign --verify --deep --strict --verbose=2 "build/Squint.app"
+
+      - name: Notarize Application
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          ditto -c -k --keepParent build/Squint.app build/Squint.zip
+
+          xcrun notarytool submit build/Squint.zip \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+
+          xcrun stapler staple build/Squint.app
+          spctl --assess --type execute --verbose=2 build/Squint.app
+
+      - name: Create and Sign DMG
+        env:
+          DEVELOPER_ID_NAME: ${{ secrets.DEVELOPER_ID_NAME }}
+        run: |
+          rm -f build/Squint.zip
+          mkdir -p build/dmg-root
+          cp -R build/Squint.app build/dmg-root/
+
+          hdiutil create -fs HFS+ -srcfolder build/dmg-root/ -volname "Squint" build/Squint.dmg
+          rm -rf build/dmg-root
+
+          # Gatekeeper requires the DMG itself to be signed to avoid the
+          # "downloaded from internet" warning on first open.
+          codesign --force --timestamp --sign "Developer ID Application: $DEVELOPER_ID_NAME" build/Squint.dmg
+          spctl --assess --type open --context context:primary-signature --verbose=2 build/Squint.dmg
+
+      - name: Sign Sparkle Update (EdDSA)
+        id: sparkle-sign
+        env:
+          # Stored base64-encoded to preserve PEM newlines reliably across
+          # GitHub Secrets transports. Generate with:
+          #   base64 -i sparkle_private.pem | pbcopy
+          SPARKLE_PRIVATE_KEY_BASE64: ${{ secrets.SPARKLE_PRIVATE_KEY_BASE64 }}
+        run: |
+          umask 077
+          curl -L -o sparkle.tar.xz "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz"
+          tar -xf sparkle.tar.xz bin/sign_update
+
+          echo "$SPARKLE_PRIVATE_KEY_BASE64" | base64 --decode > private_key.pem
+
+          SIGNATURE=$(./bin/sign_update -f private_key.pem build/Squint.dmg)
+          SIZE=$(stat -f%z build/Squint.dmg)
+
+          rm -f private_key.pem bin/sign_update sparkle.tar.xz
+
+          echo "signature=$SIGNATURE" >> "$GITHUB_OUTPUT"
+          echo "size=$SIZE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Release Assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: |
+            build/Squint.dmg
+            build/release_notes.md
+            build/release_title.txt
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-prerelease:
+    name: Publish GitHub Pre-Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Release Assets
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: build/
+
+      - name: Create Pre-Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE=$(cat build/release_title.txt)
+          gh release create ${{ github.ref_name }} \
+            --prerelease \
+            --title "${{ github.ref_name }}: $TITLE" \
+            --notes-file build/release_notes.md \
+            build/Squint.dmg
+
+  approve-and-publish:
+    name: Approve and Publish Production Release
+    needs: [build, publish-prerelease]
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download Release Assets
+        uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: build/
+
+      - name: Promote Release to Stable
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit ${{ github.ref_name }} --prerelease=false --latest
+
+      - name: Update Appcast Feed
+        env:
+          VERSION: ${{ github.ref_name }}
+          SIGNATURE: ${{ needs.build.outputs.signature }}
+          SIZE: ${{ needs.build.outputs.size }}
+        run: |
+          CLEAN_VERSION="${VERSION#v}"
+          DMG_URL="https://squint.sh/dl/$VERSION/Squint.dmg"
+          NOTES_URL="https://github.com/dupontcyborg/squint/releases/tag/$VERSION"
+
+          python3 scripts/update_appcast.py \
+            "$CLEAN_VERSION" \
+            "$SIGNATURE" \
+            "$SIZE" \
+            "$DMG_URL" \
+            "$NOTES_URL"
+
+      - name: Bump website package.json version
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          CLEAN_VERSION="${VERSION#v}"
+          # npm version writes the field without touching anything else; --no-git-tag-version
+          # prevents npm from making its own commit/tag (we handle git below).
+          npm --prefix website version "$CLEAN_VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Open Appcast PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="release/appcast-${{ github.ref_name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout -b "$BRANCH"
+          git add website/public/appcast.xml website/package.json website/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Appcast unchanged; nothing to PR"
+            exit 0
+          fi
+          git commit -m "chore: update appcast.xml for ${{ github.ref_name }}"
+          git push -u origin "$BRANCH"
+
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "chore: update appcast.xml for ${{ github.ref_name }}" \
+            --body "Automated appcast update for release ${{ github.ref_name }}."
