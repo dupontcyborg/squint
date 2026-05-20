@@ -165,7 +165,11 @@ jobs:
 
           echo "$SPARKLE_PRIVATE_KEY_BASE64" | base64 --decode > private_key.pem
 
-          SIGNATURE=$(./bin/sign_update -f private_key.pem build/Squint.dmg)
+          # sign_update prints `sparkle:edSignature="..." length="..."` for direct
+          # paste into an appcast. We only want the bare base64 signature value,
+          # and we get the size from `stat` independently.
+          RAW=$(./bin/sign_update -f private_key.pem build/Squint.dmg)
+          SIGNATURE=$(echo "$RAW" | sed -E 's/.*sparkle:edSignature="([^"]+)".*/\1/')
           SIZE=$(stat -f%z build/Squint.dmg)
 
           rm -f private_key.pem bin/sign_update sparkle.tar.xz
@@ -204,10 +208,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TITLE=$(cat build/release_title.txt)
           gh release create ${{ github.ref_name }} \
             --prerelease \
-            --title "${{ github.ref_name }}: $TITLE" \
+            --title "${{ github.ref_name }}" \
             --notes-file build/release_notes.md \
             build/Squint.dmg
 
