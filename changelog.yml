@@ -1,3 +1,9 @@
+v0.2.0:
+  title: "Menu polish"
+  notes: |
+    - Show the current Squint version as a tooltip on the "Check for Updates…" menu item.
+    - Align the "Launch at Login" item consistently whether the checkmark is shown or not.
+
 v0.1.0:
   title: "Initial Release"
   notes: |

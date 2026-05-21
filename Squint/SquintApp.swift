@@ -42,6 +42,10 @@ struct MenuView: View {
     @State private var launchAtLoginEnabled = LaunchAtLogin.isEnabled
     @State private var canCheckForUpdates = true
 
+    private var versionString: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+    }
+
     var body: some View {
         Group {
             // 1. Status Section
@@ -108,19 +112,14 @@ struct MenuView: View {
                     launchAtLoginEnabled = nextState
                 }
             }, label: {
-                HStack {
-                    if launchAtLoginEnabled {
-                        Text("✓ Launch at Login")
-                    } else {
-                        Text("  Launch at Login")
-                    }
-                }
+                Text(launchAtLoginEnabled ? "✓ Launch at Login" : "Launch at Login")
             })
 
             Button("Check for Updates…") {
                 updater.checkForUpdates()
             }
             .disabled(!canCheckForUpdates)
+            .help("Squint v\(versionString)")
 
             Divider()
 
