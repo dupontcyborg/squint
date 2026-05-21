@@ -14,7 +14,7 @@ interface ReleaseEntry {
     date?: string;
 }
 
-const REPO_URL = "https://github.com/dupontcyborg/squint";
+// const REPO_URL = "https://github.com/dupontcyborg/squint";
 const DMG_BASE = "https://squint.sh/download";
 
 function escapeXml(s: string): string {
