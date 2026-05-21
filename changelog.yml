@@ -1,3 +1,10 @@
+v0.3.0:
+  title: "Slimmer download"
+  notes: |
+    - Faster updates and fresh installs.
+    - DMG is now ~30% smaller.
+    - Source code is now MIT-licensed.
+
 v0.2.0:
   title: "Menu polish"
   notes: |
