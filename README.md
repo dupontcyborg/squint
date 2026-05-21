@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/dupontcyborg/squint/releases/latest"><img src="https://img.shields.io/github/v/release/dupontcyborg/squint?label=version&color=orange" alt="Latest release"></a>
   <a href="https://github.com/dupontcyborg/squint/releases/latest"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fsquint.sh%2Fbadge%2Fdmg.json" alt="DMG size"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/dupontcyborg/squint?color=blue" alt="MIT License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/dupontcyborg/squint" alt="MIT License"></a>
 </p>
 
 <p align="center">
