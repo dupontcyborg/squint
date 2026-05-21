@@ -31,6 +31,11 @@ mkdir -p build/Squint.app/Contents/Resources
 echo "Copying binary..."
 cp .build/release/Squint build/Squint.app/Contents/MacOS/Squint
 
+# Strip the local symbol table from the executable. Cuts ~120KB and doesn't
+# affect runtime behavior. Must run before codesign — stripping invalidates
+# an existing signature.
+strip -x build/Squint.app/Contents/MacOS/Squint
+
 echo "Copying Info.plist..."
 cp Squint/Info.plist build/Squint.app/Contents/Info.plist
 
@@ -44,6 +49,12 @@ if [ -z "$SPARKLE_FW" ]; then
 fi
 mkdir -p build/Squint.app/Contents/Frameworks
 cp -R "$SPARKLE_FW" build/Squint.app/Contents/Frameworks/Sparkle.framework
+
+# Strip compile-time-only directories. They're needed to build against Sparkle
+# but contribute nothing at runtime — about 220KB of headers/module maps.
+EMBEDDED_FW="build/Squint.app/Contents/Frameworks/Sparkle.framework"
+rm -rf "$EMBEDDED_FW/Versions/B/Headers" "$EMBEDDED_FW/Versions/B/PrivateHeaders" "$EMBEDDED_FW/Versions/B/Modules"
+rm -f "$EMBEDDED_FW/Headers" "$EMBEDDED_FW/PrivateHeaders" "$EMBEDDED_FW/Modules"
 
 echo "Copying App Icon..."
 if [ -f Squint/AppIcon.icns ]; then
