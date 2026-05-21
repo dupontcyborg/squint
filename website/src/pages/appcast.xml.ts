@@ -45,10 +45,15 @@ export const GET: APIRoute = () => {
         .map(([tag, e]) => {
             const cleanVersion = tag.replace(/^v/, "");
             const dmgUrl = `${DMG_BASE}/${tag}/Squint.dmg`;
-            const notesUrl = `${REPO_URL}/releases/tag/${tag}`;
+            // Embed the raw notes from changelog.yml inside <description> so
+            // Sparkle's update prompt renders them directly without fetching
+            // anything. CDATA + <pre> preserves whitespace and bullet layout.
+            // Note: Sparkle prefers <sparkle:releaseNotesLink> when present,
+            // so we omit it to make the inline description authoritative.
+            const description = `<![CDATA[<pre>${e.notes.trimEnd()}</pre>]]>`;
             return `    <item>
       <title>${escapeXml(`Version ${cleanVersion}`)}</title>
-      <sparkle:releaseNotesLink>${escapeXml(notesUrl)}</sparkle:releaseNotesLink>
+      <description>${description}</description>
       <pubDate>${rfc822(e.date as string)}</pubDate>
       <enclosure url="${escapeXml(dmgUrl)}" sparkle:version="${escapeXml(cleanVersion)}" sparkle:shortVersionString="${escapeXml(cleanVersion)}" length="${e.size}" type="application/octet-stream" sparkle:edSignature="${escapeXml(e.signature as string)}" />
     </item>`;

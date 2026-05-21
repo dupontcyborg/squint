@@ -1,6 +1,12 @@
 # Squint
 
 <p align="center">
+  <a href="https://github.com/dupontcyborg/squint/releases/latest"><img src="https://img.shields.io/github/v/release/dupontcyborg/squint?label=version&color=orange" alt="Latest release"></a>
+  <a href="https://github.com/dupontcyborg/squint/releases/latest"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fsquint.sh%2Fbadge%2Fdmg.json" alt="DMG size"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/dupontcyborg/squint?color=blue" alt="MIT License"></a>
+</p>
+
+<p align="center">
   <img src="Squint/AppIcon.png" width="128" height="128" alt="Squint App Icon">
 </p>
 
@@ -9,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dupontcyborg/squint/releases/latest">
+  <a href="https://squint.sh/download">
     <img src="https://img.shields.io/github/v/release/dupontcyborg/squint?label=Download%20Latest%20DMG&color=orange&style=for-the-badge" alt="Download Latest DMG">
   </a>
 </p>
