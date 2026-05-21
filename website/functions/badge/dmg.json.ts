@@ -20,10 +20,9 @@ function formatBytes(bytes: number): string {
 }
 
 export const onRequestGet: PagesFunction = async () => {
-    const res = await fetch(
-        "https://api.github.com/repos/dupontcyborg/squint/releases/latest",
-        { headers: { "user-agent": "squint-badge" } }
-    );
+    const res = await fetch("https://api.github.com/repos/dupontcyborg/squint/releases/latest", {
+        headers: { "user-agent": "squint-badge" },
+    });
 
     let message = "unknown";
     if (res.ok) {
