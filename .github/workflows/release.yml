@@ -131,6 +131,9 @@ jobs:
           rm -f build/Squint.zip
           mkdir -p build/dmg-root
           cp -R build/Squint.app build/dmg-root/
+          # Symlink so the mounted DMG shows /Applications next to Squint —
+          # enables the classic drag-to-install UX.
+          ln -s /Applications build/dmg-root/Applications
 
           hdiutil create -fs HFS+ -srcfolder build/dmg-root/ -volname "Squint" build/Squint.dmg
           rm -rf build/dmg-root
