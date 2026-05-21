@@ -1,14 +1,10 @@
-# Exclude tooling and config from GitHub's language statistics so the repo's
-# language bar reflects the actual product (Swift app + Astro website),
-# not the release pipeline and build scripts.
+# Exclude tooling, config, and the website from GitHub's language statistics
+
+# Marketing website
+website/**          linguist-vendored
 
 # Release & metrics scripts
 scripts/**          linguist-detectable=false
 
 # Build / packaging shell scripts
 *.sh                linguist-detectable=false
-
-# Astro / PostCSS config (framework boilerplate, not authored UI code)
-website/*.mjs       linguist-detectable=false
-website/*.cjs       linguist-detectable=false
-website/*.js        linguist-detectable=false
