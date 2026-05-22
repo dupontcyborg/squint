@@ -9,6 +9,9 @@ concurrency:
   group: metrics
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   accumulate:
     name: Accumulate Metrics

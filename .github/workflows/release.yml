@@ -12,6 +12,9 @@ concurrency:
 env:
   SPARKLE_VERSION: "2.9.2"
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Lint & Test
