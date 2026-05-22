@@ -1,10 +1,13 @@
+v1.0.0:
+  title: "v1 Release"
+  notes: |
+    - First "real" release!
 v0.3.0:
   title: "Slimmer download"
   notes: |
     - Faster updates and fresh installs.
     - DMG is now ~30% smaller.
     - Source code is now MIT-licensed.
-
   signature: 
     fDxxIeBqbAu9fum0jQObTSZf/vqIw3JBVfGVBlME7/v8L+txJPTiRtCInY8nUEKRcPbuTodMrhIo1LvEquYdBA==
   size: 2595961
@@ -14,7 +17,6 @@ v0.2.0:
   notes: |
     - Show the current Squint version as a tooltip on the "Check for Updates…" menu item.
     - Align the "Launch at Login" item consistently whether the checkmark is shown or not.
-
   signature: 
     u/cqlGm493qfvSrpjBvEnjG7lNZBYcW31E4nMr5GibwXVaKpOz/UmduG4MKITH8w+XfcPXP9zZzUUpnzPBMDCQ==
   size: 3498608
