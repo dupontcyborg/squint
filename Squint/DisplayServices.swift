@@ -15,20 +15,20 @@ public struct DisplayServices {
 
     private static var isInitialized: Bool = {
         guard let handle = dlopen(frameworkPath, RTLD_NOW) else {
-            print("Squint Warning: Failed to load DisplayServices framework: \(String(cString: dlerror()))")
+            Log.display.warning("Failed to load DisplayServices framework: \(String(cString: dlerror()), privacy: .public)")
             return false
         }
 
         if let enableSym = dlsym(handle, "DisplayServicesEnableAmbientLightCompensation") {
             enableFunc = unsafeBitCast(enableSym, to: EnableCompFunc.self)
         } else {
-            print("Squint Warning: Symbol DisplayServicesEnableAmbientLightCompensation not found.")
+            Log.display.warning("Symbol DisplayServicesEnableAmbientLightCompensation not found.")
         }
 
         if let getSym = dlsym(handle, "DisplayServicesAmbientLightCompensationEnabled") {
             getFunc = unsafeBitCast(getSym, to: GetCompFunc.self)
         } else {
-            print("Squint Warning: Symbol DisplayServicesAmbientLightCompensationEnabled not found.")
+            Log.display.warning("Symbol DisplayServicesAmbientLightCompensationEnabled not found.")
         }
 
         return enableFunc != nil && getFunc != nil
@@ -36,12 +36,12 @@ public struct DisplayServices {
 
     /// Set ambient light compensation (auto-brightness) state for the main display.
     /// - Parameter enabled: `true` to enable auto-brightness, `false` to disable it.
-    /// - Returns: `true` if successful, `false` otherwise.
+    /// - Returns: `true` if the state was applied and reads back as requested, `false` otherwise.
     @discardableResult
     public static func setAmbientLightCompensation(enabled: Bool) -> Bool {
         _ = isInitialized
         guard let enableFunc = enableFunc else {
-            print("Squint Error: Cannot set ambient light compensation; private API not available.")
+            Log.display.error("Cannot set ambient light compensation; private API not available.")
             return false
         }
         let mainDisplay = CGMainDisplayID()
@@ -56,7 +56,7 @@ public struct DisplayServices {
     public static func isAmbientLightCompensationEnabled() -> Bool {
         _ = isInitialized
         guard let getFunc = getFunc else {
-            print("Squint Error: Cannot query ambient light compensation; private API not available.")
+            Log.display.error("Cannot query ambient light compensation; private API not available.")
             return false
         }
         let mainDisplay = CGMainDisplayID()
