@@ -5,6 +5,10 @@ v1.1.0:
     - Fixes the greyed-out option after a shutdown.
     - More reliable auto-brightness restore.
 
+  signature: 
+    k/1qtz5FfW6BmDeU0eV3bbDD6OAv2sT7qVcgOnVbsQkF/EOMf08FDV11dOB75ZqLWQAWBiBHOTeSlZ3fBLfDAw==
+  size: 2598977
+  date: '2026-06-04T20:25:57Z'
 v1.0.0:
   title: "v1 Release"
   notes: |
