@@ -15,7 +15,8 @@ public struct DisplayServices {
 
     private static var isInitialized: Bool = {
         guard let handle = dlopen(frameworkPath, RTLD_NOW) else {
-            Log.display.warning("Failed to load DisplayServices framework: \(String(cString: dlerror()), privacy: .public)")
+            let reason = String(cString: dlerror())
+            Log.display.warning("Failed to load DisplayServices framework: \(reason, privacy: .public)")
             return false
         }
 
