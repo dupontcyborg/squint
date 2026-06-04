@@ -46,7 +46,9 @@ public struct DisplayServices {
         }
         let mainDisplay = CGMainDisplayID()
         enableFunc(mainDisplay, enabled ? 1 : 0)
-        return true
+        // The private setter returns no status, so verify by reading the value back.
+        // This catches silent no-ops (e.g. during display teardown at shutdown).
+        return isAmbientLightCompensationEnabled() == enabled
     }
 
     /// Query ambient light compensation (auto-brightness) state for the main display.

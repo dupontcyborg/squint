@@ -76,6 +76,17 @@ public class SessionManager: ObservableObject {
         self.isAutoBrightnessEnabledInSystem = getAmbientLightCompensation()
     }
 
+    /// Re-enables system auto-brightness directly, without starting a suppression session.
+    /// Used to recover when auto-brightness is off and no Squint session is active (e.g. an
+    /// orphaned off-state left by a shutdown, or a state the user set themselves).
+    /// - Returns: `true` if auto-brightness is enabled afterwards.
+    @discardableResult
+    public func enableAutoBrightness() -> Bool {
+        _ = setAmbientLightCompensation(true)
+        updateAutoBrightnessStatus()
+        return isAutoBrightnessEnabledInSystem
+    }
+
     /// Starts a new auto-brightness suppression session.
     /// - Parameter duration: Optional time interval. If `nil`, the session runs indefinitely.
     public func startSession(duration: TimeInterval?) {

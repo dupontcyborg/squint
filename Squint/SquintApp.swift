@@ -52,7 +52,10 @@ struct MenuView: View {
             switch session.state {
             case .inactive:
                 if !session.isAutoBrightnessEnabledInSystem {
-                    Text("You don't have auto-brightness enabled")
+                    Text("Auto-Brightness: Off")
+                    Button("Enable Auto-Brightness") {
+                        session.enableAutoBrightness()
+                    }
                     Divider()
                 } else {
                     Text("Auto-Brightness: Enabled")
