@@ -24,7 +24,7 @@ public struct LaunchAtLogin {
             }
             return true
         } catch {
-            print("Squint Error: Failed to modify Launch at Login status: \(error)")
+            Log.launch.error("Failed to modify Launch at Login status: \(error.localizedDescription, privacy: .public)")
             return false
         }
     }
