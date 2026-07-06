@@ -21,7 +21,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -42,7 +42,7 @@ jobs:
       size: ${{ steps.sparkle-sign.outputs.size }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Python Dependencies
         run: pip3 install --break-system-packages 'PyYAML==6.0.2'
@@ -202,7 +202,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Download Release Assets
         uses: actions/download-artifact@v8
@@ -230,7 +230,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout main
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0
