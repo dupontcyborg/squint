@@ -53,5 +53,18 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? "https://squint.s
     <div transition:animate="fade">
       <slot />
     </div>
+
+    <script>
+      // The ClientRouter restores a DOM snapshot on back/forward navigation, but
+      // <video> elements come back with their media pipeline torn down
+      // (readyState 0) and autoplay does not re-fire, so they render blank.
+      // Reload and replay any autoplay video after each client-router navigation.
+      document.addEventListener("astro:page-load", () => {
+        for (const video of document.querySelectorAll<HTMLVideoElement>("video[autoplay]")) {
+          if (video.readyState === 0) video.load();
+          video.play().catch(() => {});
+        }
+      });
+    </script>
   </body>
 </html>
