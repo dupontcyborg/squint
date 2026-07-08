@@ -1,32 +1,10 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
-import type { APIRoute } from "astro";
 import satori from "satori";
 
 const logoBuffer = readFileSync(resolve(process.cwd(), "src/assets/logo.png"));
 const logoDataUri = `data:image/png;base64,${logoBuffer.toString("base64")}`;
-
-interface OgPage {
-    slug: string;
-    title: string;
-    subtitle: string;
-}
-
-const pages: OgPage[] = [
-    {
-        slug: "home",
-        title: "Squint",
-        subtitle: "Temporarily disable auto-brightness on macOS",
-    },
-    {
-        slug: "privacy",
-        title: "Privacy Policy",
-        subtitle: "How Squint handles your data",
-    },
-];
-
-export const getStaticPaths = () => pages.map((p) => ({ params: { slug: p.slug }, props: p }));
 
 let fontRegular: ArrayBuffer | null = null;
 let fontBold: ArrayBuffer | null = null;
@@ -105,8 +83,7 @@ function buildTemplate(title: string, subtitle: string) {
     };
 }
 
-export const GET: APIRoute = async ({ props }) => {
-    const { title, subtitle } = props as OgPage;
+export async function renderOgImage(title: string, subtitle: string): Promise<Response> {
     const { fontRegular, fontBold } = await loadFonts();
 
     // Satori's React node typings are intentionally loose; we hand it a plain
@@ -130,4 +107,4 @@ export const GET: APIRoute = async ({ props }) => {
             "Cache-Control": "public, max-age=31536000, immutable",
         },
     });
-};
+}

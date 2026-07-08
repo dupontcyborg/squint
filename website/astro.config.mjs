@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
@@ -7,5 +8,8 @@ export default defineConfig({
     prefetch: {
         prefetchAll: true,
         defaultStrategy: "hover",
+    },
+    vite: {
+        plugins: [tailwindcss()],
     },
 });
