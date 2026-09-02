@@ -18,9 +18,9 @@
     "dependencies": {
         "@resvg/resvg-js": "^2.6.2",
         "@tailwindcss/vite": "^4.3.3",
-        "astro": "^7.2.4",
+        "astro": "^7.2.9",
         "postcss": "^8.5.26",
-        "satori": "^0.33.3",
+        "satori": "^0.33.4",
         "tailwindcss": "^4.0.0",
         "yaml": "^2.9.0"
     },
